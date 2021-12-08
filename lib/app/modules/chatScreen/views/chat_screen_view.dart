@@ -206,6 +206,7 @@ class ChatScreenView extends GetView<ChatScreenController> {
               ],
             ),
 
+
           ],
         ));
   }
