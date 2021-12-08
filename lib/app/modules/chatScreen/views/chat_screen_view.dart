@@ -1,6 +1,6 @@
-import 'package:chat_app/app/data/chat.dart';
-import 'package:chat_app/app/data/chat_message.dart';
-import 'package:chat_app/app/data/chat_user.dart';
+import 'package:chat_app/app/models/chat.dart';
+import 'package:chat_app/app/models/chat_message.dart';
+import 'package:chat_app/app/models/chat_user.dart';
 import 'package:chat_app/utils/date_formatter.dart';
 import 'package:chat_app/utils/switch_appbar.dart';
 import 'package:chat_ui_kit/chat_ui_kit.dart';
@@ -14,51 +14,6 @@ import '../controllers/chat_screen_controller.dart';
 class ChatScreenView extends GetView<ChatScreenController> {
 
 
-
-
-  /// Called when the user pressed the top right corner icon
-  void onChatDetailsPressed() {
-    print("Chat details pressed");
-  }
-
-  /// Called when a user tapped an item
-  void onItemPressed(int index, MessageBase message) {
-    print(
-        "item pressed, you could display images in full screen or play videos with this callback");
-  }
-
-  void onMessageSend(String text) {
-    controller.messageController.insertAll(0,[
-      ChatMessage(
-          author: controller.currentUser,
-          text: text,
-          creationTimestamp: DateTime.now().millisecondsSinceEpoch)
-    ]);
-  }
-
-  void onTypingEvent(TypingEvent event) {
-    print("typing event received: $event");
-  }
-
-  /// Copy the selected comment's comment to the clipboard.
-  /// Reset selection once copied.
-  void copyContent() {
-    String text = "";
-    controller.messageController.selectedItems.forEach((element) {
-      text += element.text ?? "";
-      text += '\n';
-    });
-    Clipboard.setData(ClipboardData(text: text)).then((value) {
-      print("text selected");
-      controller.messageController.unSelectAll();
-    });
-  }
-
-  void deleteSelectedMessages() {
-    controller.messageController.removeSelectedItems();
-    //update app bar
-    // setState(() {});
-  }
 
   Widget _buildChatTitle() {
     if (controller.isGroupChat) {
@@ -87,7 +42,7 @@ class ChatScreenView extends GetView<ChatScreenController> {
       _child = chatMessageText(Get.context!,index, item, messagePosition, messageFlow);
     } else if (_chatMessage.type == ChatMessageType.image) {
       _child = ChatMessageImage(index, item, messagePosition, messageFlow,
-          callback: () => onItemPressed(index, item));
+          callback: () => controller.onItemPressed(index, item));
     } else if (_chatMessage.type == ChatMessageType.video) {
       _child = ChatMessageVideo(index, item, messagePosition, messageFlow);
     } else if (_chatMessage.type == ChatMessageType.audio) {
@@ -204,37 +159,53 @@ class ChatScreenView extends GetView<ChatScreenController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: SwitchAppBar(
-          showSwitch: controller.messageController.isSelectionModeActive,
-          switchLeadingCallback: () => controller.messageController.unSelectAll(),
-          primaryAppBar: AppBar(
-            title: _buildChatTitle(),
-            actions: [
-              IconButton(
-                  icon: Icon(Icons.more_vert), onPressed: onChatDetailsPressed)
-            ],
+        appBar: PreferredSize(
+          preferredSize: const Size(60, 60),
+          child: GetBuilder<ChatScreenController>(
+            init: ChatScreenController(),
+            builder: (val) => SwitchAppBar(
+              showSwitch: controller.messageController.isSelectionModeActive,
+              switchLeadingCallback: () => controller.messageController.unSelectAll(),
+              primaryAppBar: AppBar(
+                title: _buildChatTitle(),
+                actions: [
+                  IconButton(
+                      icon: Icon(Icons.more_vert), onPressed: controller.onChatDetailsPressed)
+                ],
+              ),
+              switchTitle: Text(controller.selectedItemsCount.toString(),
+                  style: TextStyle(color: Colors.black)),
+              switchActions: [
+                IconButton(
+                    icon: Icon(Icons.content_copy),
+                    color: Colors.black,
+                    onPressed: controller.copyContent),
+                IconButton(
+                    color: Colors.black,
+                    icon: Icon(Icons.delete),
+                    onPressed: controller.deleteSelectedMessages),
+              ],
+            ),
           ),
-          switchTitle: Text(controller.selectedItemsCount.toString(),
-              style: TextStyle(color: Colors.black)),
-          switchActions: [
-            IconButton(
-                icon: Icon(Icons.content_copy),
-                color: Colors.black,
-                onPressed: copyContent),
-            IconButton(
-                color: Colors.black,
-                icon: Icon(Icons.delete),
-                onPressed: deleteSelectedMessages),
-          ],
         ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildMessagesList(),
-            MessageInput(
-                textController: controller.textController,
-                sendCallback: onMessageSend,
-                typingCallback: onTypingEvent),
+            Row(
+              children: [
+              IconButton(onPressed: (){}, icon: Icon(Icons.attach_file)),
+                Expanded(
+                  child: MessageInput(
+                      textController: controller.textController,
+                      sendCallback: controller.onMessageSend,
+                      typingCallback: controller.onTypingEvent,
+                  ),
+                ),
+                IconButton(onPressed: (){}, icon: Icon(Icons.mic)),
+              ],
+            ),
+
           ],
         ));
   }

@@ -1,5 +1,6 @@
-import 'package:chat_app/app/data/chat.dart';
-import 'package:chat_app/app/data/chat_message.dart';
+
+import 'package:chat_app/app/models/chat.dart';
+import 'package:chat_app/app/models/chat_message.dart';
 import 'package:chat_app/app/routes/app_pages.dart';
 import 'package:chat_app/utils/app_colors.dart';
 import 'package:chat_app/utils/date_formatter.dart';
@@ -48,7 +49,7 @@ class ChatsScreenView extends GetView<ChatsScreenController> {
                       // Navigator.of(context).pop();
                       Get.back();
                       //delete in DB, from the current list in memory and update UI
-                      controller.controller.removeItem(chat);
+                      controller.chatListController.removeItem(chat);
                     },
                     child: Text("ok")),
                 Padding(
@@ -132,7 +133,7 @@ class ChatsScreenView extends GetView<ChatsScreenController> {
           automaticallyImplyLeading: false,
         ),
         body: ChatsList(
-            controller: controller.controller,
+            controller: controller.chatListController,
             appUserId: controller.localUser.id,
             scrollHandler: handleScrollEvent,
             groupAvatarStyle: GroupAvatarStyle(

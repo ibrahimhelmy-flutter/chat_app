@@ -1,6 +1,6 @@
-import 'package:chat_app/app/data/chat.dart';
-import 'package:chat_app/app/data/chat_message.dart';
-import 'package:chat_app/app/data/chat_user.dart';
+import 'package:chat_app/app/models/chat.dart';
+import 'package:chat_app/app/models/chat_message.dart';
+import 'package:chat_app/app/models/chat_user.dart';
 import 'package:chat_app/utils/app_const.dart';
 import 'package:chat_ui_kit/chat_ui_kit.dart';
 import 'package:get/get.dart';
@@ -8,18 +8,15 @@ import 'package:get/get.dart';
 class ChatsScreenController extends GetxController {
 
   ChatUser get localUser => chatUsers[0];
-
-  // Map<String, List<ChatMessage>> chatMessages = {};
-
-  late ChatsListController controller;
+  Map<String, List<ChatMessage>> chatMessages = {};
+  late ChatsListController chatListController;
   @override
   void onInit() {
     super.onInit();
-    controller = ChatsListController();
-    controller.addAll(generateExampleChats());
+    chatListController = ChatsListController();
+    chatListController.addAll(generateExampleChats());
 
   }
-
 
   List<ChatUser> chatUsers = [
     ChatUser(
@@ -61,9 +58,28 @@ class ChatsScreenController extends GetxController {
 
   List<ChatWithMembers> generateExampleChats() {
 
-
-    Map<String, List<ChatMessage>>   chatMessages = {
+       chatMessages = {
       "test_chat_id_0": [
+
+        ChatMessage(
+            author: localUser,
+            text: "image",
+            type: ChatMessageType.image,
+            attachment:"https://i.pinimg.com/564x/58/6c/c4/586cc42265d9319e3c153d92458764f9.jpg" ,
+            creationTimestamp: DateTime.now().millisecondsSinceEpoch - 5000),
+
+        ChatMessage(
+            author: chatUsers[1],
+            text: "ibrahim",
+            type: ChatMessageType.renameChat,
+            attachment:"ffff" ,
+            creationTimestamp: DateTime.now().millisecondsSinceEpoch - 5000),
+        ChatMessage(
+            author: chatUsers[1],
+            // text: "you? :)",
+            type: ChatMessageType.audio,
+            attachment:"" ,
+            creationTimestamp: DateTime.now().millisecondsSinceEpoch - 5000),
         ChatMessage(
             author: chatUsers[1],
             text: "you? :)",
@@ -78,6 +94,13 @@ class ChatsScreenController extends GetxController {
             creationTimestamp: DateTime.now().millisecondsSinceEpoch),
       ],
       "test_chat_id_1": [
+        ChatMessage(
+            author: chatUsers[1],
+            text: "video",
+            type: ChatMessageType.video,
+            id: ";;",
+            attachment:"https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" ,
+            creationTimestamp: DateTime.now().millisecondsSinceEpoch - 5000),
         ChatMessage(
             type: ChatMessageType.image,
             author: localUser,
@@ -173,18 +196,9 @@ class ChatsScreenController extends GetxController {
     return _chats;
   }
 
-
-
-  @override
-  void onReady() {
-    super.onReady();
-  }
-
-  @override
-  void onClose() {}
   @override
   void dispose() {
-    controller.dispose();
+    chatListController.dispose();
     super.dispose();
   }
 }
